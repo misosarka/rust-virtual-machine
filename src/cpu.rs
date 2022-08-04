@@ -1,62 +1,33 @@
 use super::instructions;
-use super::memory::{array_to_idx, Memory, ADDR_SIZE};
+use super::memory::Memory;
 
 pub struct CPU {
-    ip: [u8; ADDR_SIZE],
-    reg: u8,
+    ip: u32,
+    reg: u32,
+    ar: u32,
     flag: bool,
     memory: Memory,
 }
 
 impl CPU {
-    pub fn new(start: Vec<u8>) -> CPU {
+    pub fn new(start: &[u32]) -> CPU {
         CPU {
-            ip: [0; ADDR_SIZE],
+            ip: 0,
             reg: 0,
+            ar: 0,
             flag: false,
             memory: Memory::new(start),
         }
     }
 
-    fn increment_ip(&mut self) {
-        let mut overflow;
-        for i in (0..ADDR_SIZE).rev() {
-            (self.ip[i], overflow) = self.ip[i].overflowing_add(1);
-            if !overflow {
-                break;
-            }
-        }
-        /*
-        (self.ip[1], overflow) = self.ip[1].overflowing_add(1);
-        if overflow {
-            self.ip[0] = self.ip[0].wrapping_add(1);
-        } */
-    }
-
-    fn read_next(&mut self) -> u8 {
+    fn read_next(&mut self) -> u32 {
         let result = self.memory.read(self.ip);
-        self.increment_ip();
+        self.ip = self.ip.wrapping_add(1);
         result
-    }
-
-    fn read_addr(&mut self) -> [u8; ADDR_SIZE] {
-        let result = self.memory.read_addr(self.ip);
-        for _ in 0..ADDR_SIZE {
-            self.increment_ip();
-        }
-        result
-    }
-
-    fn read_at(&self, address: [u8; ADDR_SIZE]) -> u8 {
-        self.memory.read(address)
-    }
-
-    fn write_at(&mut self, address: [u8; ADDR_SIZE], value: u8) {
-        self.memory.write(address, value);
     }
 
     fn jump_if(&mut self, condition: bool) {
-        let address = self.read_addr();
+        let address = self.read_next();
         if condition {
             self.ip = address;
         }
@@ -68,20 +39,45 @@ impl CPU {
             instructions::END => {
                 return false;
             }
-            instructions::GET => {
-                let address = self.read_addr();
-                self.reg = self.read_at(address);
-                self.flag = false;
-            }
-            instructions::SET => {
-                let address = self.read_addr();
-                self.write_at(address, self.reg);
-                self.flag = false;
-            }
-            instructions::VAL => {
+
+            instructions::MOV_LIT_REG => {
                 self.reg = self.read_next();
-                self.flag = false;
             }
+            instructions::MOV_LIT_AR => {
+                self.ar = self.read_next();
+            }
+
+            instructions::MOV_MEM_REG => {
+                let address = self.read_next();
+                self.reg = self.memory.read(address);
+            }
+            instructions::MOV_MEM_AR => {
+                let address = self.read_next();
+                self.ar = self.memory.read(address);
+            }
+
+            instructions::MOV_REG_MEM => {
+                let address = self.read_next();
+                self.memory.write(address, self.reg);
+            }
+            instructions::MOV_REG_AR => {
+                self.ar = self.reg;
+            }
+            instructions::MOV_REG_AAR => {
+                self.memory.write(self.ar, self.reg);
+            }
+
+            instructions::MOV_AR_REG => {
+                self.reg = self.ar;
+            }
+
+            instructions::MOV_AAR_REG => {
+                self.reg = self.memory.read(self.ar);
+            }
+            instructions::MOV_AAR_AR => {
+                self.ar = self.memory.read(self.ar);
+            }
+
             instructions::ADD_LIT => {
                 let value = self.read_next();
                 (self.reg, self.flag) = self.reg.overflowing_add(value);
@@ -113,44 +109,46 @@ impl CPU {
                 self.reg ^= value;
                 self.flag = false;
             }
+
             instructions::ADD_MEM => {
-                let address = self.read_addr();
-                let value = self.read_at(address);
+                let address = self.read_next();
+                let value = self.memory.read(address);
                 (self.reg, self.flag) = self.reg.overflowing_add(value);
             }
             instructions::SUB_MEM => {
-                let address = self.read_addr();
-                let value = self.read_at(address);
+                let address = self.read_next();
+                let value = self.memory.read(address);
                 (self.reg, self.flag) = self.reg.overflowing_sub(value);
             }
             instructions::SBF_MEM => {
-                let address = self.read_addr();
-                let value = self.read_at(address);
+                let address = self.read_next();
+                let value = self.memory.read(address);
                 (self.reg, self.flag) = value.overflowing_sub(self.reg);
             }
             instructions::MUL_MEM => {
-                let address = self.read_addr();
-                let value = self.read_at(address);
+                let address = self.read_next();
+                let value = self.memory.read(address);
                 (self.reg, self.flag) = self.reg.overflowing_mul(value);
             }
             instructions::AND_MEM => {
-                let address = self.read_addr();
-                let value = self.read_at(address);
+                let address = self.read_next();
+                let value = self.memory.read(address);
                 self.reg &= value;
                 self.flag = false;
             }
             instructions::ORB_MEM => {
-                let address = self.read_addr();
-                let value = self.read_at(address);
+                let address = self.read_next();
+                let value = self.memory.read(address);
                 self.reg |= value;
                 self.flag = false;
             }
             instructions::XOR_MEM => {
-                let address = self.read_addr();
-                let value = self.read_at(address);
+                let address = self.read_next();
+                let value = self.memory.read(address);
                 self.reg ^= value;
                 self.flag = false;
             }
+
             instructions::INC => {
                 (self.reg, self.flag) = self.reg.overflowing_add(1);
             }
@@ -160,18 +158,21 @@ impl CPU {
             instructions::NOT => {
                 self.reg = !self.reg;
             }
+
             instructions::JMP => self.jump_if(true),
             instructions::JFL => self.jump_if(self.flag),
             instructions::JNF => self.jump_if(!self.flag),
             instructions::JZE => self.jump_if(self.reg == 0),
             instructions::JNZ => self.jump_if(self.reg != 0),
-            _ => (),
+            instructions::JMA => self.ip = self.ar,
+
+            x => panic!("Error: invalid instruction: {x}"),
         };
         true
     }
 
     pub fn print_info(&self, address: usize, offset: usize) {
-        print!("ip: {:#06x}   ", array_to_idx(self.ip));
+        print!("ip: {:#06x}   ", self.ip);
         print!("reg: {:02x}   ", self.reg);
         print!("flag: {}   ", self.flag as u8);
         print!(
