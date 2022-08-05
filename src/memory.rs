@@ -4,7 +4,9 @@ pub struct Memory {
 
 impl Memory {
     pub fn new(start: &[u32]) -> Memory {
-        let mut data = vec![0; 1 << 32].into_boxed_slice();
+        // For technical reasons (not enough RAM), the memory is only 4 GB instead of 16 GB
+        // Only addresses 0x00000000 to 0x3fffffff are indexable
+        let mut data = vec![0; 1 << 30].into_boxed_slice();
 
         for (i, &val) in start.iter().enumerate() {
             data[i] = val;

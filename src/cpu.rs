@@ -1,10 +1,15 @@
 use super::instructions;
 use super::memory::Memory;
 
+const STACK_START: u32 = 0x10000000;
+const STACK_LIMIT: u32 = 0x20000000 - 0x10;
+
 pub struct CPU {
     ip: u32,
     reg: u32,
     ar: u32,
+    sp: u32,
+    fp: u32,
     flag: bool,
     memory: Memory,
 }
@@ -15,6 +20,8 @@ impl CPU {
             ip: 0,
             reg: 0,
             ar: 0,
+            sp: STACK_START,
+            fp: STACK_START,
             flag: false,
             memory: Memory::new(start),
         }
@@ -34,6 +41,19 @@ impl CPU {
         self.flag = false;
     }
 
+    fn push(&mut self, value: u32) {
+        self.memory.write(self.sp, value);
+        self.sp = self.sp.wrapping_add(1);
+        if self.sp > STACK_LIMIT {
+            panic!("Error: stack overflow");
+        }
+    }
+
+    fn pull(&mut self) -> u32 {
+        self.sp = self.sp.wrapping_sub(1);
+        self.memory.read(self.sp)
+    }
+
     pub fn execute(&mut self) -> bool {
         match self.read_next() {
             instructions::END => {
@@ -45,6 +65,10 @@ impl CPU {
             }
             instructions::MOV_LIT_AR => {
                 self.ar = self.read_next();
+            }
+            instructions::PSH_LIT => {
+                let value = self.read_next();
+                self.push(value);
             }
 
             instructions::MOV_MEM_REG => {
@@ -66,9 +90,15 @@ impl CPU {
             instructions::MOV_REG_AAR => {
                 self.memory.write(self.ar, self.reg);
             }
+            instructions::PSH_REG => {
+                self.push(self.reg);
+            }
 
             instructions::MOV_AR_REG => {
                 self.reg = self.ar;
+            }
+            instructions::PSH_AR => {
+                self.push(self.ar);
             }
 
             instructions::MOV_AAR_REG => {
@@ -76,6 +106,23 @@ impl CPU {
             }
             instructions::MOV_AAR_AR => {
                 self.ar = self.memory.read(self.ar);
+            }
+
+            instructions::MOV_SP_REG => {
+                self.reg = self.sp;
+            }
+            instructions::MOV_SP_AR => {
+                self.ar = self.sp;
+            }
+            instructions::PSH_SP => {
+                self.push(self.sp);
+            }
+
+            instructions::PUL_REG => {
+                self.reg = self.pull();
+            }
+            instructions::PUL_AR => {
+                self.ar = self.pull();
             }
 
             instructions::ADD_LIT => {
@@ -165,6 +212,19 @@ impl CPU {
             instructions::JZE => self.jump_if(self.reg == 0),
             instructions::JNZ => self.jump_if(self.reg != 0),
             instructions::JMA => self.ip = self.ar,
+
+            instructions::CAL => {
+                let addr = self.read_next();
+                self.push(self.fp);
+                self.push(self.ip);
+                self.fp = self.sp;
+                self.ip = addr;
+            }
+            instructions::RET => {
+                self.sp = self.fp;
+                self.ip = self.pull();
+                self.fp = self.pull();
+            }
 
             x => panic!("Error: invalid instruction: {x}"),
         };
