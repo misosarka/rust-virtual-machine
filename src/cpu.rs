@@ -114,14 +114,14 @@ impl CPU {
                 self.ar = self.memory.read(self.ar);
             }
 
-            instructions::MOV_SP_REG => {
-                self.reg = self.sp;
+            instructions::MOV_FP_REG => {
+                self.reg = self.fp;
             }
-            instructions::MOV_SP_AR => {
-                self.ar = self.sp;
+            instructions::MOV_FP_AR => {
+                self.ar = self.fp;
             }
-            instructions::PSH_SP => {
-                self.push(self.sp);
+            instructions::PSH_FP => {
+                self.push(self.fp);
             }
 
             instructions::PUL_REG => {

@@ -18,9 +18,9 @@ pub const PSH_AR: u8 = 0x41; // psa
 pub const MOV_AAR_REG: u8 = 0x50; // gea
 pub const MOV_AAR_AR: u8 = 0x51; // ada
 
-pub const MOV_SP_REG: u8 = 0x60; // tsr
-pub const MOV_SP_AR: u8 = 0x61; // tsa
-pub const PSH_SP: u8 = 0x62; // pss
+pub const MOV_FP_REG: u8 = 0x60; // tfr
+pub const MOV_FP_AR: u8 = 0x61; // tfa
+pub const PSH_FP: u8 = 0x62; // psf
 
 pub const PUL_REG: u8 = 0x70; // plr
 pub const PUL_AR: u8 = 0x71; // pla
