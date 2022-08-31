@@ -6,6 +6,6 @@ mod tests {
     #[test]
     #[should_panic(expected = "stack overflow")]
     fn stack_overflow() {
-        run(&[PSH_LIT, 0x12345678, JMP, 0x00000000]);
+        run(&[PSH_LIT, 0x12, 0x34, 0x56, 0x78, JMP, 0x00]);
     }
 }

@@ -1,18 +1,46 @@
 use super::instructions::*;
 
-pub const CODE: &[u32] = STACK_TESTING;
+pub const CODE: &[u8] = POWERS_OF_2;
 
-const POWERS_OF_2: &[u32] = &[
+const POWERS_OF_2: &[u8] = &[
     MOV_LIT_REG,
+    0x00,
+    0x00,
+    0x00,
     0x01,
     MOV_REG_MEM,
-    0x80000000,
+    0x80,
+    0x00,
+    0x00,
+    0x00,
     MOV_MEM_REG,
-    0x80000000,
+    0x80,
+    0x00,
+    0x00,
+    0x00,
     ADD_MEM,
-    0x80000000,
+    0x80,
+    0x00,
+    0x00,
+    0x00,
     JNF,
-    0x02,
+    0x00,
+    0x00,
+    0x00,
+    0x05,
 ];
 
-const STACK_TESTING: &[u32] = &[MOV_LIT_REG, 0x1234, PSH_REG, MOV_LIT_REG, 0, PUL_REG];
+const STACK_TESTING: &[u8] = &[
+    MOV_LIT_REG,
+    0x12,
+    0x34,
+    0x56,
+    0x78,
+    PSH_REG,
+    MOV_LIT_REG,
+    0x00,
+    0x00,
+    0x00,
+    0x00,
+    PUL_REG,
+];

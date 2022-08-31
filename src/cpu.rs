@@ -15,7 +15,7 @@ pub struct CPU {
 }
 
 impl CPU {
-    pub fn new(start: &[u32]) -> CPU {
+    pub fn new(start: &[u8]) -> CPU {
         CPU {
             ip: 0,
             reg: 0,
@@ -27,9 +27,15 @@ impl CPU {
         }
     }
 
+    fn read_next_instruction(&mut self) -> u8 {
+        let result = self.memory.read_instruction(self.ip);
+        self.ip = self.ip.wrapping_add(1);
+        result
+    }
+
     fn read_next(&mut self) -> u32 {
         let result = self.memory.read(self.ip);
-        self.ip = self.ip.wrapping_add(1);
+        self.ip = self.ip.wrapping_add(4);
         result
     }
 
@@ -43,19 +49,19 @@ impl CPU {
 
     fn push(&mut self, value: u32) {
         self.memory.write(self.sp, value);
-        self.sp = self.sp.wrapping_add(1);
+        self.sp = self.sp.wrapping_add(4);
         if self.sp > STACK_LIMIT {
             panic!("Error: stack overflow");
         }
     }
 
     fn pull(&mut self) -> u32 {
-        self.sp = self.sp.wrapping_sub(1);
+        self.sp = self.sp.wrapping_sub(4);
         self.memory.read(self.sp)
     }
 
     pub fn execute(&mut self) -> bool {
-        match self.read_next() {
+        match self.read_next_instruction() {
             instructions::END => {
                 return false;
             }
