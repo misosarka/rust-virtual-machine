@@ -60,6 +60,52 @@ impl CPU {
         self.memory.read(self.sp)
     }
 
+    fn add(target: &mut u32, other: u32, flag: &mut bool) {
+        (*target, *flag) = target.overflowing_add(other);
+    }
+
+    fn sub(target: &mut u32, other: u32, flag: &mut bool) {
+        (*target, *flag) = target.overflowing_sub(other);
+    }
+
+    fn mul(target: &mut u32, other: u32, flag: &mut bool) {
+        (*target, *flag) = target.overflowing_mul(other);
+    }
+
+    fn and(target: &mut u32, other: u32, flag: &mut bool) {
+        *target &= other;
+        *flag = false;
+    }
+
+    fn or(target: &mut u32, other: u32, flag: &mut bool) {
+        *target |= other;
+        *flag = false;
+    }
+
+    fn xor(target: &mut u32, other: u32, flag: &mut bool) {
+        *target ^= other;
+        *flag = false;
+    }
+
+    fn shl(target: &mut u32, other: u32, flag: &mut bool) {
+        if other >= 32 {
+            *target = 0;
+            *flag = true;
+        } else {
+            *flag = target.leading_zeros() < other;
+            *target = target.wrapping_shl(other);
+        }
+    }
+
+    fn shr(target: &mut u32, other: u32, flag: &mut bool) {
+        *flag = false;
+        if other >= 32 {
+            *target = 0;
+        } else {
+            *target = target.wrapping_shr(other);
+        }
+    }
+
     pub fn execute(&mut self) -> bool {
         match self.read_next_instruction() {
             instructions::END => {
@@ -133,73 +179,274 @@ impl CPU {
 
             instructions::ADD_LIT => {
                 let value = self.read_next();
-                (self.reg, self.flag) = self.reg.overflowing_add(value);
+                Self::add(&mut self.reg, value, &mut self.flag);
             }
             instructions::SUB_LIT => {
                 let value = self.read_next();
-                (self.reg, self.flag) = self.reg.overflowing_sub(value);
-            }
-            instructions::SBF_LIT => {
-                let value = self.read_next();
-                (self.reg, self.flag) = value.overflowing_sub(self.reg);
+                Self::sub(&mut self.reg, value, &mut self.flag);
             }
             instructions::MUL_LIT => {
                 let value = self.read_next();
-                (self.reg, self.flag) = self.reg.overflowing_mul(value);
+                Self::mul(&mut self.reg, value, &mut self.flag);
             }
             instructions::AND_LIT => {
                 let value = self.read_next();
-                self.reg &= value;
-                self.flag = false;
+                Self::and(&mut self.reg, value, &mut self.flag);
             }
             instructions::ORB_LIT => {
                 let value = self.read_next();
-                self.reg |= value;
-                self.flag = false;
+                Self::or(&mut self.reg, value, &mut self.flag);
             }
             instructions::XOR_LIT => {
                 let value = self.read_next();
-                self.reg ^= value;
-                self.flag = false;
+                Self::xor(&mut self.reg, value, &mut self.flag);
+            }
+            instructions::SHL_LIT => {
+                let value = self.read_next();
+                Self::shl(&mut self.reg, value, &mut self.flag);
+            }
+            instructions::SHR_LIT => {
+                let value = self.read_next();
+                Self::shr(&mut self.reg, value, &mut self.flag);
             }
 
             instructions::ADD_MEM => {
                 let address = self.read_next();
                 let value = self.memory.read(address);
-                (self.reg, self.flag) = self.reg.overflowing_add(value);
+                Self::add(&mut self.reg, value, &mut self.flag);
             }
             instructions::SUB_MEM => {
                 let address = self.read_next();
                 let value = self.memory.read(address);
-                (self.reg, self.flag) = self.reg.overflowing_sub(value);
-            }
-            instructions::SBF_MEM => {
-                let address = self.read_next();
-                let value = self.memory.read(address);
-                (self.reg, self.flag) = value.overflowing_sub(self.reg);
+                Self::sub(&mut self.reg, value, &mut self.flag);
             }
             instructions::MUL_MEM => {
                 let address = self.read_next();
                 let value = self.memory.read(address);
-                (self.reg, self.flag) = self.reg.overflowing_mul(value);
+                Self::mul(&mut self.reg, value, &mut self.flag);
             }
             instructions::AND_MEM => {
                 let address = self.read_next();
                 let value = self.memory.read(address);
-                self.reg &= value;
-                self.flag = false;
+                Self::and(&mut self.reg, value, &mut self.flag);
             }
             instructions::ORB_MEM => {
                 let address = self.read_next();
                 let value = self.memory.read(address);
-                self.reg |= value;
-                self.flag = false;
+                Self::or(&mut self.reg, value, &mut self.flag);
             }
             instructions::XOR_MEM => {
                 let address = self.read_next();
                 let value = self.memory.read(address);
-                self.reg ^= value;
-                self.flag = false;
+                Self::xor(&mut self.reg, value, &mut self.flag);
+            }
+            instructions::SHL_MEM => {
+                let address = self.read_next();
+                let value = self.memory.read(address);
+                Self::shl(&mut self.reg, value, &mut self.flag);
+            }
+            instructions::SHR_MEM => {
+                let address = self.read_next();
+                let value = self.memory.read(address);
+                Self::shr(&mut self.reg, value, &mut self.flag);
+            }
+
+            instructions::ADD_AAR => {
+                let value = self.memory.read(self.ar);
+                Self::add(&mut self.reg, value, &mut self.flag);
+            }
+            instructions::SUB_AAR => {
+                let value = self.memory.read(self.ar);
+                Self::sub(&mut self.reg, value, &mut self.flag);
+            }
+            instructions::MUL_AAR => {
+                let value = self.memory.read(self.ar);
+                Self::mul(&mut self.reg, value, &mut self.flag);
+            }
+            instructions::AND_AAR => {
+                let value = self.memory.read(self.ar);
+                Self::and(&mut self.reg, value, &mut self.flag);
+            }
+            instructions::ORB_AAR => {
+                let value = self.memory.read(self.ar);
+                Self::or(&mut self.reg, value, &mut self.flag);
+            }
+            instructions::XOR_AAR => {
+                let value = self.memory.read(self.ar);
+                Self::xor(&mut self.reg, value, &mut self.flag);
+            }
+            instructions::SHL_AAR => {
+                let value = self.memory.read(self.ar);
+                Self::shl(&mut self.reg, value, &mut self.flag);
+            }
+            instructions::SHR_AAR => {
+                let value = self.memory.read(self.ar);
+                Self::shr(&mut self.reg, value, &mut self.flag);
+            }
+
+            instructions::ADD_PUL => {
+                let value = self.pull();
+                Self::add(&mut self.reg, value, &mut self.flag);
+            }
+            instructions::SUB_PUL => {
+                let value = self.pull();
+                Self::sub(&mut self.reg, value, &mut self.flag);
+            }
+            instructions::MUL_PUL => {
+                let value = self.pull();
+                Self::mul(&mut self.reg, value, &mut self.flag);
+            }
+            instructions::AND_PUL => {
+                let value = self.pull();
+                Self::and(&mut self.reg, value, &mut self.flag);
+            }
+            instructions::ORB_PUL => {
+                let value = self.pull();
+                Self::or(&mut self.reg, value, &mut self.flag);
+            }
+            instructions::XOR_PUL => {
+                let value = self.pull();
+                Self::xor(&mut self.reg, value, &mut self.flag);
+            }
+            instructions::SHL_PUL => {
+                let value = self.pull();
+                Self::shl(&mut self.reg, value, &mut self.flag);
+            }
+            instructions::SHR_PUL => {
+                let value = self.pull();
+                Self::shr(&mut self.reg, value, &mut self.flag);
+            }
+
+            instructions::AAD_LIT => {
+                let value = self.read_next();
+                Self::add(&mut self.ar, value, &mut self.flag);
+            }
+            instructions::ASB_LIT => {
+                let value = self.read_next();
+                Self::sub(&mut self.ar, value, &mut self.flag);
+            }
+            instructions::AML_LIT => {
+                let value = self.read_next();
+                Self::mul(&mut self.ar, value, &mut self.flag);
+            }
+            instructions::AAN_LIT => {
+                let value = self.read_next();
+                Self::and(&mut self.ar, value, &mut self.flag);
+            }
+            instructions::AOR_LIT => {
+                let value = self.read_next();
+                Self::or(&mut self.ar, value, &mut self.flag);
+            }
+            instructions::AXR_LIT => {
+                let value = self.read_next();
+                Self::xor(&mut self.ar, value, &mut self.flag);
+            }
+            instructions::ASL_LIT => {
+                let value = self.read_next();
+                Self::shl(&mut self.ar, value, &mut self.flag);
+            }
+            instructions::ASR_LIT => {
+                let value = self.read_next();
+                Self::shr(&mut self.ar, value, &mut self.flag);
+            }
+
+            instructions::AAD_MEM => {
+                let address = self.read_next();
+                let value = self.memory.read(address);
+                Self::add(&mut self.ar, value, &mut self.flag);
+            }
+            instructions::ASB_MEM => {
+                let address = self.read_next();
+                let value = self.memory.read(address);
+                Self::sub(&mut self.ar, value, &mut self.flag);
+            }
+            instructions::AML_MEM => {
+                let address = self.read_next();
+                let value = self.memory.read(address);
+                Self::mul(&mut self.ar, value, &mut self.flag);
+            }
+            instructions::AAN_MEM => {
+                let address = self.read_next();
+                let value = self.memory.read(address);
+                Self::and(&mut self.ar, value, &mut self.flag);
+            }
+            instructions::AOR_MEM => {
+                let address = self.read_next();
+                let value = self.memory.read(address);
+                Self::or(&mut self.ar, value, &mut self.flag);
+            }
+            instructions::AXR_MEM => {
+                let address = self.read_next();
+                let value = self.memory.read(address);
+                Self::xor(&mut self.ar, value, &mut self.flag);
+            }
+            instructions::ASL_MEM => {
+                let address = self.read_next();
+                let value = self.memory.read(address);
+                Self::shl(&mut self.ar, value, &mut self.flag);
+            }
+            instructions::ASR_MEM => {
+                let address = self.read_next();
+                let value = self.memory.read(address);
+                Self::shr(&mut self.ar, value, &mut self.flag);
+            }
+
+            instructions::AAD_REG => {
+                Self::add(&mut self.ar, self.reg, &mut self.flag);
+            }
+            instructions::ASB_REG => {
+                Self::sub(&mut self.ar, self.reg, &mut self.flag);
+            }
+            instructions::AML_REG => {
+                Self::mul(&mut self.ar, self.reg, &mut self.flag);
+            }
+            instructions::AAN_REG => {
+                Self::and(&mut self.ar, self.reg, &mut self.flag);
+            }
+            instructions::AOR_REG => {
+                Self::or(&mut self.ar, self.reg, &mut self.flag);
+            }
+            instructions::AXR_REG => {
+                Self::xor(&mut self.ar, self.reg, &mut self.flag);
+            }
+            instructions::ASL_REG => {
+                Self::shl(&mut self.ar, self.reg, &mut self.flag);
+            }
+            instructions::ASR_REG => {
+                Self::shr(&mut self.ar, self.reg, &mut self.flag);
+            }
+
+            instructions::AAD_PUL => {
+                let value = self.pull();
+                Self::add(&mut self.ar, value, &mut self.flag);
+            }
+            instructions::ASB_PUL => {
+                let value = self.pull();
+                Self::sub(&mut self.ar, value, &mut self.flag);
+            }
+            instructions::AML_PUL => {
+                let value = self.pull();
+                Self::mul(&mut self.ar, value, &mut self.flag);
+            }
+            instructions::AAN_PUL => {
+                let value = self.pull();
+                Self::and(&mut self.ar, value, &mut self.flag);
+            }
+            instructions::AOR_PUL => {
+                let value = self.pull();
+                Self::or(&mut self.ar, value, &mut self.flag);
+            }
+            instructions::AXR_PUL => {
+                let value = self.pull();
+                Self::xor(&mut self.ar, value, &mut self.flag);
+            }
+            instructions::ASL_PUL => {
+                let value = self.pull();
+                Self::shl(&mut self.ar, value, &mut self.flag);
+            }
+            instructions::ASR_PUL => {
+                let value = self.pull();
+                Self::shr(&mut self.ar, value, &mut self.flag);
             }
 
             instructions::INC => {

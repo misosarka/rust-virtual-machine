@@ -44,3 +44,16 @@ const STACK_TESTING: &[u8] = &[
     0x00,
     PUL_REG,
 ];
+
+const ADD_LITERAL: &[u8] = &[
+    MOV_LIT_REG,
+    0x80,
+    0x00,
+    0x00,
+    0x00,
+    ADD_LIT,
+    0x00,
+    0x00,
+    0x80,
+    0x00,
+];
