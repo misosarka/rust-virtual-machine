@@ -4,7 +4,7 @@ use super::memory::Memory;
 const STACK_START: u32 = 0x10000000;
 const STACK_LIMIT: u32 = 0x20000000 - 0x10;
 
-pub struct CPU {
+pub(crate) struct Cpu {
     ip: u32,
     reg: u32,
     ar: u32,
@@ -14,9 +14,9 @@ pub struct CPU {
     memory: Memory,
 }
 
-impl CPU {
-    pub fn new(start: &[u8]) -> CPU {
-        CPU {
+impl Cpu {
+    pub fn new(start: &[u8]) -> Cpu {
+        Cpu {
             ip: 0,
             reg: 0,
             ar: 0,

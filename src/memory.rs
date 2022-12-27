@@ -1,4 +1,4 @@
-pub struct Memory {
+pub(crate) struct Memory {
     data: Box<[u8]>,
 }
 
@@ -38,7 +38,7 @@ impl Memory {
         for a in address..(address + offset) {
             result.push_str(&format!("{:02x} ", self.data[a]));
             if a % 4 == 3 {
-                result.push_str(" ");
+                result.push(' ');
             }
         }
         result

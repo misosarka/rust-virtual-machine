@@ -1,6 +1,6 @@
 use super::instructions::*;
 
-pub const CODE: &[u8] = POWERS_OF_2;
+pub(crate) const CODE: &[u8] = POWERS_OF_2;
 
 const POWERS_OF_2: &[u8] = &[
     MOV_LIT_REG,
