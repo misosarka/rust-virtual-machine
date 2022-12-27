@@ -484,15 +484,13 @@ impl CPU {
         true
     }
 
-    pub fn print_info(&self, address: usize, offset: usize) {
-        print!("ip: {:#06x}   ", self.ip);
-        print!("reg: {:02x}   ", self.reg);
-        print!("flag: {}   ", self.flag as u8);
-        print!(
-            "memory at {:#06x}: {}",
-            address,
-            self.memory.read_after(address, offset)
-        );
+    pub fn print_info(&self) {
+        print!("I: {:04x}   ", self.ip);
+        print!("RFA: {:08x} ", self.reg);
+        print!("{} ", if self.flag { "F" } else { " " });
+        print!("{:08x}   ", self.ar);
+        print!("SF: {:08x} {:08x}   ", self.sp, self.fp);
+        print!("frame: {}", self.memory.read_after(self.fp as usize, 0x10));
         println!();
     }
 }
