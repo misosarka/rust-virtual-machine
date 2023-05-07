@@ -115,3 +115,4 @@ pub(crate) const IPA: u8 = 0xf0;
 pub(crate) const IPB: u8 = 0xf1;
 pub(crate) const IPC: u8 = 0xf2;
 pub(crate) const OUT: u8 = 0xf3;
+pub(crate) const SLP: u8 = 0xf4;

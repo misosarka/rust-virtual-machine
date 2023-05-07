@@ -1,6 +1,6 @@
 use super::instructions::*;
 
-pub(crate) const CODE: &[u8] = HELLO_WORLD;
+pub(crate) const CODE: &[u8] = COUNTDOWN;
 pub(crate) const DEBUG: bool = false;
 
 const POWERS_OF_2: &[u8] = &[
@@ -90,4 +90,41 @@ const HELLO_WORLD: &[u8] = &[
     0x00,
     0x6f,
     OUT,
+];
+
+const WAIT_FOR_SPACE: &[u8] = &[
+    IPA, AND_LIT, 0x00, 0x00, 0x00, 0x01, JZE, 0x00, 0x00, 0x00, 0x00,
+];
+
+const COUNTDOWN: &[u8] = &[
+    MOV_LIT_REG,
+    0x00,
+    0x00,
+    0x00,
+    0x06,
+    DEC,
+    ADD_LIT,
+    0x00,
+    0x00,
+    0x00,
+    0x30,
+    OUT,
+    PSH_REG,
+    MOV_LIT_REG,
+    0x00,
+    0x00,
+    0x03,
+    0xe8,
+    SLP,
+    PUL_REG,
+    SUB_LIT,
+    0x00,
+    0x00,
+    0x00,
+    0x30,
+    JNZ,
+    0x00,
+    0x00,
+    0x00,
+    0x05,
 ];

@@ -2,6 +2,9 @@ use super::instructions;
 use super::io::{input_a, input_b, input_c, write_char};
 use super::memory::Memory;
 
+use std::thread::sleep;
+use std::time::Duration;
+
 const STACK_START: u32 = 0x10000000;
 const STACK_LIMIT: u32 = 0x20000000 - 0x10;
 
@@ -484,6 +487,7 @@ impl Cpu {
             instructions::IPB => self.reg = input_b(),
             instructions::IPC => self.reg = input_c(),
             instructions::OUT => write_char(self.reg),
+            instructions::SLP => sleep(Duration::from_millis(self.reg as u64)),
 
             x => panic!("Error: invalid instruction: {x}"),
         };
