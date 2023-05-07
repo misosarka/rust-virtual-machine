@@ -2,14 +2,19 @@
 mod code;
 mod cpu;
 mod instructions;
+mod io;
 mod memory;
 #[allow(dead_code)]
 mod runner;
 mod tests;
 
-use code::CODE;
-use runner::run_debug;
+use code::{CODE, DEBUG};
+use runner::{run, run_debug};
 
 fn main() {
-    run_debug(CODE);
+    if DEBUG {
+        run_debug(CODE);
+    } else {
+        run(CODE);
+    }
 }

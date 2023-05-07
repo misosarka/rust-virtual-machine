@@ -14,3 +14,4 @@ name = "virtual_machine_bin"
 path = "src/main.rs"
 
 [dependencies]
+device_query = "1.1.3"

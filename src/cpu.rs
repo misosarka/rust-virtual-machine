@@ -1,4 +1,5 @@
 use super::instructions;
+use super::io::{input_a, input_b, input_c, write_char};
 use super::memory::Memory;
 
 const STACK_START: u32 = 0x10000000;
@@ -478,6 +479,11 @@ impl Cpu {
                 self.ip = self.pull();
                 self.fp = self.pull();
             }
+
+            instructions::IPA => self.reg = input_a(),
+            instructions::IPB => self.reg = input_b(),
+            instructions::IPC => self.reg = input_c(),
+            instructions::OUT => write_char(self.reg),
 
             x => panic!("Error: invalid instruction: {x}"),
         };

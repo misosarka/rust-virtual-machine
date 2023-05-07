@@ -1,6 +1,7 @@
 use super::instructions::*;
 
-pub(crate) const CODE: &[u8] = POWERS_OF_2;
+pub(crate) const CODE: &[u8] = HELLO_WORLD;
+pub(crate) const DEBUG: bool = false;
 
 const POWERS_OF_2: &[u8] = &[
     MOV_LIT_REG,
@@ -56,4 +57,37 @@ const ADD_LITERAL: &[u8] = &[
     0x00,
     0x80,
     0x00,
+];
+
+const HELLO_WORLD: &[u8] = &[
+    MOV_LIT_REG,
+    0x00,
+    0x00,
+    0x00,
+    0x48,
+    OUT,
+    MOV_LIT_REG,
+    0x00,
+    0x00,
+    0x00,
+    0x65,
+    OUT,
+    MOV_LIT_REG,
+    0x00,
+    0x00,
+    0x00,
+    0x6c,
+    OUT,
+    MOV_LIT_REG,
+    0x00,
+    0x00,
+    0x00,
+    0x6c,
+    OUT,
+    MOV_LIT_REG,
+    0x00,
+    0x00,
+    0x00,
+    0x6f,
+    OUT,
 ];
