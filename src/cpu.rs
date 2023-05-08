@@ -5,6 +5,8 @@ use super::memory::Memory;
 use std::thread::sleep;
 use std::time::Duration;
 
+use rand::random;
+
 const STACK_START: u32 = 0x10000000;
 const STACK_LIMIT: u32 = 0x20000000 - 0x10;
 
@@ -488,6 +490,7 @@ impl Cpu {
             instructions::IPC => self.reg = input_c(),
             instructions::OUT => write_char(self.reg),
             instructions::SLP => sleep(Duration::from_millis(self.reg as u64)),
+            instructions::RND => self.reg = random(),
 
             x => panic!("Error: invalid instruction: {x}"),
         };

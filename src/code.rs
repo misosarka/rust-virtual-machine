@@ -1,7 +1,7 @@
 use super::instructions::*;
 
-pub(crate) const CODE: &[u8] = COUNTDOWN;
-pub(crate) const DEBUG: bool = false;
+pub(crate) const CODE: &[u8] = RANDOM;
+pub(crate) const DEBUG: bool = true;
 
 const POWERS_OF_2: &[u8] = &[
     MOV_LIT_REG,
@@ -128,3 +128,5 @@ const COUNTDOWN: &[u8] = &[
     0x00,
     0x05,
 ];
+
+const RANDOM: &[u8] = &[RND];
