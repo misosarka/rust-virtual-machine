@@ -1,6 +1,6 @@
 use super::instructions::*;
 
-pub(crate) const CODE: &[u8] = RANDOM;
+pub(crate) const CODE: &[u8] = SLEEP;
 pub(crate) const DEBUG: bool = true;
 
 const POWERS_OF_2: &[u8] = &[
@@ -130,3 +130,7 @@ const COUNTDOWN: &[u8] = &[
 ];
 
 const RANDOM: &[u8] = &[RND];
+
+const UTC_TIME: &[u8] = &[UTC];
+
+const SLEEP: &[u8] = &[MOV_LIT_REG, 0x00, 0x00, 0x01, 0x00, SLP, TIM];

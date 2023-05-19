@@ -117,3 +117,5 @@ pub(crate) const IPC: u8 = 0xf2;
 pub(crate) const OUT: u8 = 0xf3;
 pub(crate) const SLP: u8 = 0xf4;
 pub(crate) const RND: u8 = 0xf5;
+pub(crate) const UTC: u8 = 0xf6;
+pub(crate) const TIM: u8 = 0xf7;

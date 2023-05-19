@@ -3,7 +3,7 @@ use super::io::{input_a, input_b, input_c, write_char};
 use super::memory::Memory;
 
 use std::thread::sleep;
-use std::time::Duration;
+use std::time::{Duration, Instant, SystemTime};
 
 use rand::random;
 
@@ -18,6 +18,7 @@ pub(crate) struct Cpu {
     fp: u32,
     flag: bool,
     memory: Memory,
+    start: Instant,
 }
 
 impl Cpu {
@@ -29,6 +30,7 @@ impl Cpu {
             sp: STACK_START,
             fp: STACK_START,
             flag: false,
+            start: Instant::now(),
             memory: Memory::new(start),
         }
     }
@@ -491,8 +493,14 @@ impl Cpu {
             instructions::OUT => write_char(self.reg),
             instructions::SLP => sleep(Duration::from_millis(self.reg as u64)),
             instructions::RND => self.reg = random(),
+            instructions::UTC => {
+                self.reg = SystemTime::elapsed(&SystemTime::UNIX_EPOCH)
+                    .expect("invalid system time")
+                    .as_secs() as u32
+            }
+            instructions::TIM => self.reg = Instant::elapsed(&self.start).as_millis() as u32,
 
-            x => panic!("Error: invalid instruction: {x}"),
+            x => panic!("invalid instruction: {x}"),
         };
         true
     }
