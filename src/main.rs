@@ -6,7 +6,6 @@ mod io;
 mod memory;
 #[allow(dead_code)]
 mod runner;
-mod tests;
 
 use code::{CODE, DEBUG};
 use runner::{run, run_debug};

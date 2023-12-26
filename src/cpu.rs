@@ -65,6 +65,9 @@ impl Cpu {
 
     fn pull(&mut self) -> u32 {
         self.sp = self.sp.wrapping_sub(4);
+        if self.sp < STACK_START {
+            panic!("Error: stack underflow");
+        }
         self.memory.read(self.sp)
     }
 
