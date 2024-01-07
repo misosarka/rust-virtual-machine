@@ -1,7 +1,16 @@
 use super::instructions::*;
 
-pub(crate) const CODE: &[u8] = SLEEP;
-pub(crate) const DEBUG: bool = true;
+/// Change to true to see the state of the CPU after each instruction is executed.
+///
+/// Key:
+/// * I = instruction pointer
+/// * RFA = (general) register, flag (shows 'F' when true), address register
+/// * SF = stack pointer, frame pointer
+/// * frame = lowest 16 bytes of the current stack frame
+pub(crate) const DEBUG: bool = false;
+
+/// Change to run a different program defined below.
+pub(crate) const CODE: &[u8] = COUNTDOWN;
 
 const POWERS_OF_2: &[u8] = &[
     MOV_LIT_REG,
@@ -110,6 +119,12 @@ const COUNTDOWN: &[u8] = &[
     0x30,
     OUT,
     PSH_REG,
+    MOV_LIT_REG,
+    0x00,
+    0x00,
+    0x00,
+    0x0a,
+    OUT,
     MOV_LIT_REG,
     0x00,
     0x00,
