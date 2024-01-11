@@ -468,6 +468,7 @@ impl Cpu {
             }
             instructions::NOT => {
                 self.reg = !self.reg;
+                self.flag = false;
             }
 
             instructions::JMP => self.jump_if(true),
@@ -475,7 +476,10 @@ impl Cpu {
             instructions::JNF => self.jump_if(!self.flag),
             instructions::JZE => self.jump_if(self.reg == 0),
             instructions::JNZ => self.jump_if(self.reg != 0),
-            instructions::JMA => self.ip = self.ar,
+            instructions::JMA => {
+                self.ip = self.ar;
+                self.flag = false;
+            }
 
             instructions::CAL => {
                 let addr = self.read_next();
